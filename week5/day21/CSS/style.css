@@ -1,0 +1,39 @@
+*{
+    padding:0;
+    margin:0;
+}
+
+
+body {
+    background-color: black;
+}
+
+
+
+.title {
+    color: rgb(36, 123, 180);
+    font-size: 50px;
+    /* margin top right bottom left */
+    /* margin: 80px; */
+    /* margin-top: 20px; */
+    /* margin: 20px 0; */
+    /* margin: 0 20px 15px 40px; */
+
+}
+
+#unique_block{
+    width: 400px;
+    height: 400px;
+    background-color: lightpink;
+    border: 3px solid #baf50a;
+    border-radius: 10px;
+    text-align: center;
+    /* padding: 45px */
+    display: flex;
+    /* выравнивание по оси X */
+    justify-content: center; 
+    /* выравнивание по оси Y */
+    align-items: center;
+}
+
+

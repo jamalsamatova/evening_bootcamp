@@ -1,0 +1,355 @@
+jamal@jamal-Inspiron-11-3147:~$ nano phones.txt
+jamal@jamal-Inspiron-11-3147:~$ ls
+Desktop    Downloads         folder                                  Music       Pictures                Public           snap       test_dir
+Documents  evening_bootcamp  google-chrome-stable_current_amd64.deb  phones.txt  psql_commands.txt.save  shakespeare.sql  Templates  Videos
+jamal@jamal-Inspiron-11-3147:~$ cat phones.txt
+iPhone 12/5/1000/True
+Samsung Galaxy S20/3/800/True
+Xiaomi Note 9/2/250/True
+LG Optimus L5/1/100/True
+Samsung Galaxy A31/6/200/True
+Nokia N97/0/100/False
+iPhone 13 Pro/5/1500/True
+
+jamal@jamal-Inspiron-11-3147:~$ COPY phones (name, count, price, in_stock) FROM '/home/jamal/phones.txt' WITH (FORMAT text, delimiter '/');
+bash: syntax error near unexpected token `('
+jamal@jamal-Inspiron-11-3147:~$ sudo -i -u postgres
+postgres@jamal-Inspiron-11-3147:~$ psql
+psql (12.9 (Ubuntu 12.9-0ubuntu0.20.04.1))
+Type "help" for help.
+
+postgres=# \c store_db
+You are now connected to database "store_db" as user "postgres".
+store_db=# COPY phones (name, count, price, in_stock) FROM '/home/jamal/phones.txt' WITH (FORMAT text, delimiter '/');
+COPY 7
+
+store_db=# SELECT * FROM phones;
+ id |        name        | count | price | in_stock 
+----+--------------------+-------+-------+----------
+  1 | iPhone 12          |     5 |  1000 | True
+  2 | Samsung Galaxy S20 |     3 |   800 | True
+  3 | Xiaomi Note 9      |     2 |   250 | True
+  4 | LG Optimus L5      |     1 |   100 | True
+  5 | Samsung Galaxy A31 |     6 |   200 | True
+  6 | Nokia N97          |     0 |   100 | False
+  7 | iPhone 13 Pro      |     5 |  1500 | True
+(7 rows)
+
+
+store_db=# CREATE TABLE persons (
+store_db(# id SERIAL PRIMARY KEY,
+store_db(# firstname_name VARCHAR(50),
+store_db(# email VARCHAR(50),
+store_db(# phone VARCHAR(20));
+CREATE TABLE
+store_db=# INSERT INTO persons (firstname_name, email, phone) VALUES ('Jack', 'jack@mail.com', '+996555888999'), ('Tom', 'tom@mail.com', '+996555333999'),('Jessica', 'jessica@mail.com', '+996888777222'), ('Helen', 'helen@mail.com', '+996333222111');
+INSERT 0 4
+store_db=# select * from persons;
+ id | firstname_name |      email       |     phone     
+----+----------------+------------------+---------------
+  1 | Jack           | jack@mail.com    | +996555888999
+  2 | Tom            | tom@mail.com     | +996555333999
+  3 | Jessica        | jessica@mail.com | +996888777222
+  4 | Helen          | helen@mail.com   | +996333222111
+(4 rows)
+
+store_db=# CREATE TABLE delivery (
+store_db(# id SERIAL PRIMARY KEY,
+store_db(# phone_id INT NOT NULL REFERENCES phones(id) ON DELETE CASCADE,
+store_db(# person_id INT NOT NULL REFERENCES persons(id) ON DELETE CASCADE,
+store_db(# count INT DEFAULT 1,
+store_db(# address VARCHAR(70) NOT NULL);
+CREATE TABLE
+store_db=# ALTER TABLE persons RENAME COLUMN firstname_name TO firstname;
+ALTER TABLE
+store_db=# select * from persons;
+ id | firstname |      email       |     phone     
+----+-----------+------------------+---------------
+  1 | Jack      | jack@mail.com    | +996555888999
+  2 | Tom       | tom@mail.com     | +996555333999
+  3 | Jessica   | jessica@mail.com | +996888777222
+  4 | Helen     | helen@mail.com   | +996333222111
+(4 rows)
+
+store_db=# \d delivery
+                                     Table "public.delivery"
+  Column   |         Type          | Collation | Nullable |               Default                
+-----------+-----------------------+-----------+----------+--------------------------------------
+ id        | integer               |           | not null | nextval('delivery_id_seq'::regclass)
+ phone_id  | integer               |           | not null | 
+ person_id | integer               |           | not null | 
+ count     | integer               |           |          | 1
+ address   | character varying(70) |           | not null | 
+Indexes:
+    "delivery_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "delivery_person_id_fkey" FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE
+    "delivery_phone_id_fkey" FOREIGN KEY (phone_id) REFERENCES phones(id) ON DELETE CASCADE
+
+store_db=# SELECT * FROM phones;
+ id |        name        | count | price | in_stock 
+----+--------------------+-------+-------+----------
+  1 | iPhone 12          |     5 |  1000 | True
+  2 | Samsung Galaxy S20 |     3 |   800 | True
+  3 | Xiaomi Note 9      |     2 |   250 | True
+  4 | LG Optimus L5      |     1 |   100 | True
+  5 | Samsung Galaxy A31 |     6 |   200 | True
+  6 | Nokia N97          |     0 |   100 | False
+  7 | iPhone 13 Pro      |     5 |  1500 | True
+(7 rows)
+
+store_db=# INSERT INTO delivery (phone_id, person_id, count, address) VALUES (1, 2, 2, 'Bishkek'), (5, 1, 1, 'New York'), (6, 3, 3, 'Moscow'), (4, 4, 1, 'London');
+INSERT 0 4
+store_db=# SELECT * FROM delivery;
+ id | phone_id | person_id | count | address  
+----+----------+-----------+-------+----------
+  1 |        1 |         2 |     2 | Bishkek
+  2 |        5 |         1 |     1 | New York
+  3 |        6 |         3 |     3 | Moscow
+  4 |        4 |         4 |     1 | London
+(4 rows)
+
+store_db=# SELECT persons.firstname, phones.name, delivery.count FROM delivery JOIN persons ON persons.id = delivery.person_id JOIN phones ON phones.id = delivery.phone_id;
+ firstname |        name        | count 
+-----------+--------------------+-------
+ Tom       | iPhone 12          |     2
+ Jack      | Samsung Galaxy A31 |     1
+ Jessica   | Nokia N97          |     3
+ Helen     | LG Optimus L5      |     1
+(4 rows)
+
+store_db=# SELECT p.name, d.address, d.count, p.price * d.count AS total_cost FROM delivery AS d JOIN phones AS p ON p.id = d.phone_id ORDER BY total_cost;
+        name        | address  | count | total_cost 
+--------------------+----------+-------+------------
+ LG Optimus L5      | London   |     1 |        100
+ Samsung Galaxy A31 | New York |     1 |        200
+ Nokia N97          | Moscow   |     3 |        300
+ iPhone 12          | Bishkek  |     2 |       2000
+(4 rows)
+
+store_db=# SELECT persons.firstname, phones.price * delivery.count AS total_cost FROM delivery JOIN persons ON persons.id = delivery.person_id JOIN phones ON phones.id = delivery.phone_id ORDER BY total_cost DESC;
+ firstname | total_cost 
+-----------+------------
+ Tom       |       2000
+ Jessica   |        300
+ Jack      |        200
+ Helen     |        100
+(4 rows)
+
+
+store_db=# SELECT ROUND(AVG(p.price * d.count), 2) AS avg_total_price, MIN(p.price * d.count) AS min_total_price, MAX(p.price * d.count) AS max_total_price FROM delivery AS d JOIN phones AS p ON p.id = d.phone_id;
+ avg_total_price | min_total_price | max_total_price 
+-----------------+-----------------+-----------------
+          650.00 |             100 |            2000
+(1 row)
+
+store_db=# SELECT pr.firstname, ph.name FROM delivery AS d JOIN persons AS pr ON pr.id = d.person_id JOIN phones AS ph ON ph.id = d.phone_id WHERE ph.name LIKE '%iPhone%';
+ firstname |   name    
+-----------+-----------
+ Tom       | iPhone 12
+(1 row)
+
+
+store_db=# TRUNCATE TABLE delivery;
+TRUNCATE TABLE
+store_db=# select * from delivery;
+ id | phone_id | person_id | count | address 
+----+----------+-----------+-------+---------
+(0 rows)
+
+store_db=# \d delivery
+                                     Table "public.delivery"
+  Column   |         Type          | Collation | Nullable |               Default                
+-----------+-----------------------+-----------+----------+--------------------------------------
+ id        | integer               |           | not null | nextval('delivery_id_seq'::regclass)
+ phone_id  | integer               |           | not null | 
+ person_id | integer               |           | not null | 
+ count     | integer               |           |          | 1
+ address   | character varying(70) |           | not null | 
+Indexes:
+    "delivery_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "delivery_person_id_fkey" FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE
+    "delivery_phone_id_fkey" FOREIGN KEY (phone_id) REFERENCES phones(id) ON DELETE CASCADE
+
+store_db=# ALTER TABLE delivery ALTER COLUMN person_id DROP NOT NULL;
+ALTER TABLE
+store_db=# ALTER TABLE delivery ALTER COLUMN phone_id DROP NOT NULL;
+ALTER TABLE
+
+
+store_db=# \d delivery
+                                     Table "public.delivery"
+  Column   |         Type          | Collation | Nullable |               Default                
+-----------+-----------------------+-----------+----------+--------------------------------------
+ id        | integer               |           | not null | nextval('delivery_id_seq'::regclass)
+ phone_id  | integer               |           |          | 
+ person_id | integer               |           |          | 
+ count     | integer               |           |          | 1
+ address   | character varying(70) |           | not null | 
+Indexes:
+    "delivery_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "delivery_person_id_fkey" FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE
+    "delivery_phone_id_fkey" FOREIGN KEY (phone_id) REFERENCES phones(id) ON DELETE CASCADE
+
+store_db=# INSERT INTO delivery (person_id, count, address) VALUES (3, 2, 'Bishkek'), (2, 3, 'New York');
+INSERT 0 2
+store_db=# INSERT INTO delivery (phone_id, count, address) VALUES (5, 2, 'Moscow'), (2, 4, 'London');
+INSERT 0 2
+store_db=# select * from delivery;
+ id | phone_id | person_id | count | address  
+----+----------+-----------+-------+----------
+  5 |          |         3 |     2 | Bishkek
+  6 |          |         2 |     3 | New York
+  7 |        5 |           |     2 | Moscow
+  8 |        2 |           |     4 | London
+(4 rows)
+
+
+store_db=# SELECT delivery.count, persons.firstname FROM delivery INNER JOIN persons ON persons.id = delivery.person_id;
+ count | firstname 
+-------+-----------
+     2 | Jessica
+     3 | Tom
+(2 rows)
+
+store_db=# SELECT delivery.count, persons.firstname FROM delivery LEFT JOIN persons ON persons.id = delivery.person_id;
+ count | firstname 
+-------+-----------
+     2 | Jessica
+     3 | Tom
+     2 | 
+     4 | 
+(4 rows)
+
+store_db=# SELECT delivery.count, persons.firstname FROM delivery RIGHT JOIN persons ON persons.id = delivery.person_id;
+ count | firstname 
+-------+-----------
+     2 | Jessica
+     3 | Tom
+       | Helen
+       | Jack
+(4 rows)
+
+store_db=# SELECT delivery.count, persons.firstname FROM delivery FULL JOIN persons ON persons.id = delivery.person_id;
+ count | firstname 
+-------+-----------
+     2 | Jessica
+     3 | Tom
+     2 | 
+     4 | 
+       | Helen
+       | Jack
+(6 rows)
+
+store_db=# SELECT delivery.count, persons.firstname, phones.name FROM delivery FULL JOIN persons ON persons.id = delivery.person_id FULL JOIN phones ON phones.id = delivery.phone_id;
+ count | firstname |        name        
+-------+-----------+--------------------
+     2 | Jessica   | 
+     3 | Tom       | 
+     2 |           | Samsung Galaxy A31
+     4 |           | Samsung Galaxy S20
+       | Helen     | 
+       | Jack      | 
+       |           | Nokia N97
+       |           | LG Optimus L5
+       |           | iPhone 12
+       |           | Xiaomi Note 9
+       |           | iPhone 13 Pro
+(11 rows)
+
+
+####################################################################################################
+
+TASK ШЕКСПИР
+
+1. Вытащить все произведения, в которых source = Moby и количество параграфов меньше 100
+
+shakespeare=# SELECT source, totalparagraphs, title FROM work WHERE source = 'Moby' AND totalparagraphs < 100;
+ source | totalparagraphs |         title          
+--------+-----------------+------------------------
+ Moby   |              47 | Lover's Complaint
+ Moby   |              43 | Passionate Pilgrim
+ Moby   |              19 | Phoenix and the Turtle
+(3 rows)
+_____________________________________________________________________________________
+
+2. Вытащить произведение и номера параграфов, в которых количество героев меньше 10
+
+shakespeare=# SELECT paragraphnum, workid, charcount FROM paragraph WHERE charcount < 10;
+_____________________________________________________________________________________
+
+3. Найти количество параграфов в каждом произведении
+
+shakespeare=# SELECT COUNT(*) AS total_par, workid FROM paragraph GROUP BY workid;
+_____________________________________________________________________________________
+
+4. Найти сколько произведений относится к каждому жанру
+
+shakespeare=# SELECT COUNT(*), genretype FROM work GROUP BY genretype;
+ count | genretype 
+-------+-----------
+    14 | c
+     5 | p
+    12 | h
+    11 | t
+     1 | s
+(5 rows)
+_____________________________________________________________________________________
+
+5. Найти среднее количество параграфов и среднее количество слов в каждом произведении
+
+shakespeare=# SELECT ROUND(AVG(totalparagraphs)) AS avg_par, ROUND(AVG(totalwords)) AS avg_words, title FROM work GROUP BY title;
+_____________________________________________________________________________________
+
+6. Найти количество глав в каждом произведении
+
+shakespeare=# SELECT COUNT(*) AS chapters, work.title FROM chapter INNER JOIN work ON work.workid = chapter.workid GROUP BY work.title;
+_____________________________________________________________________________________
+
+7. Вытащить имена героев, чьи реплики составляют больше 200 слов, произведения, в которых они встречаются, жанр, год выхода произведения и отсортировать в порядке убыывания года выхода
+
+shakespeare=# SELECT character.charname, work.title, work.genretype, work.year FROM character_work INNER JOIN character ON character.charid = character_work.charid INNER JOIN work ON work.workid = character_work.workid WHERE character. speechcount > 200 ORDER BY work.year DESC;
+
+      charname      |         title          | genretype | year 
+--------------------+------------------------+-----------+------
+ Poet               | Lover's Complaint      | p         | 1609
+ Poet               | Sonnets                | s         | 1609
+ Timon              | Timon of Athens        | t         | 1607
+ Antony             | Antony and Cleopatra   | t         | 1606
+ Cleopatra          | Antony and Cleopatra   | t         | 1606
+ Iago               | Othello                | t         | 1604
+ Othello            | Othello                | t         | 1604
+ Poet               | Phoenix and the Turtle | p         | 1601
+ Hamlet             | Hamlet                 | t         | 1600
+ Falstaff           | Merry Wives of Windsor | c         | 1600
+ Antony             | Julius Caesar          | t         | 1599
+ Rosalind           | As You Like It         | c         | 1599
+ Falstaff           | Henry V                | h         | 1598
+ Duke of Gloucester | Henry V                | h         | 1598
+ Henry V            | Henry V                | h         | 1598
+ Poet               | Passionate Pilgrim     | p         | 1598
+ Henry V            | Henry IV, Part I       | h         | 1597
+ Henry V            | Henry IV, Part II      | h         | 1597
+ Falstaff           | Henry IV, Part II      | h         | 1597
+ Falstaff           | Henry IV, Part I       | h         | 1597
+ Poet               | Rape of Lucrece        | p         | 1594
+ Poet               | Venus and Adonis       | p         | 1593
+ Duke of Gloucester | Richard III            | h         | 1592
+ Richard III        | Richard III            | h         | 1592
+ Duke of Gloucester | Henry VI, Part I       | h         | 1591
+ Richard III        | Henry VI, Part III     | h         | 1590
+ Duke of Gloucester | Henry VI, Part II      | h         | 1590
+(27 rows)
+_____________________________________________________________________________________
+
+8. Вытащить героя, который чаще всех появлялся в произведении
+
+shakespeare=# SELECT character.charname, COUNT(*) AS works_count FROM character_work INNER JOIN character ON character.charid = character_work.charid INNER JOIN work ON work.workid = character_work.workid GROUP BY character.charname ORDER BY works_count DESC LIMIT 1;
+ charname  | works_count 
+-----------+-------------
+ Messenger |          23
+(1 row)
+
+
