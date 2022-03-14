@@ -1,0 +1,169 @@
+jamal@jamal-Inspiron-11-3147:~/git_practice$ git init
+Initialized empty Git repository in /home/jamal/git_practice/.git/
+jamal@jamal-Inspiron-11-3147:~/git_practice$ git remote add origin git@github.com:jamalsamatova/simple_project.git
+jamal@jamal-Inspiron-11-3147:~/git_practice$ git pull origin main
+
+remote: Enumerating objects: 3, done.
+remote: Counting objects: 100% (3/3), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+Unpacking objects: 100% (3/3), 1.52 KiB | 776.00 KiB/s, done.
+From github.com:jamalsamatova/simple_project
+ * branch            main       -> FETCH_HEAD
+ * [new branch]      main       -> origin/main
+jamal@jamal-Inspiron-11-3147:~/git_practice$ 
+jamal@jamal-Inspiron-11-3147:~/git_practice$ git branch -v
+* master 5f603a8 Initial commit
+jamal@jamal-Inspiron-11-3147:~/git_practice$ git branch user_1
+jamal@jamal-Inspiron-11-3147:~/git_practice$ git checkout user_1
+M       .gitignore
+Switched to branch 'user_1'
+jamal@jamal-Inspiron-11-3147:~/git_practice$ git branch -v
+  master 5f603a8 Initial commit
+* user_1 5f603a8 Initial commit
+jamal@jamal-Inspiron-11-3147:~/git_practice$ git add .
+jamal@jamal-Inspiron-11-3147:~/git_practice$ git commit -m 'Add main project'
+[user_1 af973c2] Add main project
+ 8 files changed, 204 insertions(+), 1 deletion(-)
+ create mode 100755 project_1/manage.py
+ create mode 100644 project_1/requirements.txt
+ create mode 100644 project_1/simple_project/__init__.py
+ create mode 100644 project_1/simple_project/asgi.py
+ create mode 100644 project_1/simple_project/settings.py
+ create mode 100644 project_1/simple_project/urls.py
+ create mode 100644 project_1/simple_project/wsgi.py
+jamal@jamal-Inspiron-11-3147:~/git_practice$ git push origin user_1
+Enumerating objects: 14, done.
+Counting objects: 100% (14/14), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (10/10), done.
+Writing objects: 100% (12/12), 3.02 KiB | 1.00 MiB/s, done.
+Total 12 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas: 100% (2/2), completed with 1 local object.
+remote: 
+remote: Create a pull request for 'user_1' on GitHub by visiting:
+remote:      https://github.com/jamalsamatova/simple_project/pull/new/user_1
+remote: 
+To github.com:jamalsamatova/simple_project.git
+ * [new branch]      user_1 -> user_1
+(env) jamal@jamal-Inspiron-11-3147:~/git_practice/project_1$ cd ../
+(env) jamal@jamal-Inspiron-11-3147:~/git_practice$ mkdir project_2
+(env) jamal@jamal-Inspiron-11-3147:~/git_practice$ cd project_2
+(env) jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ git clone https://github.com/jamalsamatova/simple_project.git .
+Cloning into '.'...
+remote: Enumerating objects: 16, done.
+remote: Counting objects: 100% (16/16), done.
+remote: Compressing objects: 100% (11/11), done.
+remote: Total 16 (delta 2), reused 13 (delta 2), pack-reused 0
+Unpacking objects: 100% (16/16), 5.11 KiB | 327.00 KiB/s, done.
+(env) jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ deactivate
+jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ ls
+project_1
+jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ ls -a
+.  ..  .git  .gitignore  project_1
+jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ git remote -v
+origin	https://github.com/jamalsamatova/simple_project.git (fetch)
+origin	https://github.com/jamalsamatova/simple_project.git (push)
+jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ python3 -m venv env
+jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ . env/bin/activate
+(env) jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ pip3 install -r requirements
+ERROR: Could not open requirements file: [Errno 2] No such file or directory: 'requirements'
+(env) jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ pip3 install -r requirements.txt
+ERROR: Could not open requirements file: [Errno 2] No such file or directory: 'requirements.txt'
+(env) jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ pip3 install Django
+Collecting Django
+  Using cached Django-4.0.3-py3-none-any.whl (8.0 MB)
+Collecting sqlparse>=0.2.2
+  Using cached sqlparse-0.4.2-py3-none-any.whl (42 kB)
+Collecting asgiref<4,>=3.4.1
+  Using cached asgiref-3.5.0-py3-none-any.whl (22 kB)
+Collecting backports.zoneinfo; python_version < "3.9"
+  Using cached backports.zoneinfo-0.2.1-cp38-cp38-manylinux1_x86_64.whl (74 kB)
+Installing collected packages: sqlparse, asgiref, backports.zoneinfo, Django
+Successfully installed Django-4.0.3 asgiref-3.5.0 backports.zoneinfo-0.2.1 sqlparse-0.4.2
+(env) jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ pip3 install -r rest-framework
+ERROR: Could not open requirements file: [Errno 2] No such file or directory: 'rest-framework'
+(env) jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ pip3 install -r django-rest-framework
+ERROR: Could not open requirements file: [Errno 2] No such file or directory: 'django-rest-framework'
+(env) jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ pip3 install django-rest-framework
+Collecting django-rest-framework
+  Using cached django-rest-framework-0.1.0.tar.gz (969 bytes)
+Collecting djangorestframework
+  Using cached djangorestframework-3.13.1-py3-none-any.whl (958 kB)
+Requirement already satisfied: django>=2.2 in ./env/lib/python3.8/site-packages (from djangorestframework->django-rest-framework) (4.0.3)
+Collecting pytz
+  Using cached pytz-2021.3-py2.py3-none-any.whl (503 kB)
+Requirement already satisfied: backports.zoneinfo; python_version < "3.9" in ./env/lib/python3.8/site-packages (from django>=2.2->djangorestframework->django-rest-framework) (0.2.1)
+Requirement already satisfied: sqlparse>=0.2.2 in ./env/lib/python3.8/site-packages (from django>=2.2->djangorestframework->django-rest-framework) (0.4.2)
+Requirement already satisfied: asgiref<4,>=3.4.1 in ./env/lib/python3.8/site-packages (from django>=2.2->djangorestframework->django-rest-framework) (3.5.0)
+Building wheels for collected packages: django-rest-framework
+  Building wheel for django-rest-framework (setup.py) ... error
+  ERROR: Command errored out with exit status 1:
+   command: /home/jamal/git_practice/project_2/env/bin/python3 -u -c 'import sys, setuptools, tokenize; sys.argv[0] = '"'"'/tmp/pip-install-tvrz67n6/django-rest-framework/setup.py'"'"'; __file__='"'"'/tmp/pip-install-tvrz67n6/django-rest-framework/setup.py'"'"';f=getattr(tokenize, '"'"'open'"'"', open)(__file__);code=f.read().replace('"'"'\r\n'"'"', '"'"'\n'"'"');f.close();exec(compile(code, __file__, '"'"'exec'"'"'))' bdist_wheel -d /tmp/pip-wheel-6kf2bsyd
+       cwd: /tmp/pip-install-tvrz67n6/django-rest-framework/
+  Complete output (6 lines):
+  usage: setup.py [global_opts] cmd1 [cmd1_opts] [cmd2 [cmd2_opts] ...]
+     or: setup.py --help [cmd1 cmd2 ...]
+     or: setup.py --help-commands
+     or: setup.py cmd --help
+  
+  error: invalid command 'bdist_wheel'
+  ----------------------------------------
+  ERROR: Failed building wheel for django-rest-framework
+  Running setup.py clean for django-rest-framework
+Failed to build django-rest-framework
+Installing collected packages: pytz, djangorestframework, django-rest-framework
+    Running setup.py install for django-rest-framework ... done
+Successfully installed django-rest-framework-0.1.0 djangorestframework-3.13.1 pytz-2021.3
+(env) jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ pip3 install wheel
+Collecting wheel
+  Using cached wheel-0.37.1-py2.py3-none-any.whl (35 kB)
+Installing collected packages: wheel
+Successfully installed wheel-0.37.1
+(env) jamal@jamal-Inspiron-11-3147:~/git_practice/project_2$ 
+
+
+
+git branch user_2
+git checkout user_2
+git add .
+git commit -m 'Add account application'
+git push origin user_2
+
+username for github: 
+password: github -> settings -> developer settings -> personal access tokens -> generate new token/token + expiration -> generate token -> copy token
+password: token
+
+
+
+-> github (with a new branch)
+user_2 had recent pushes 1 minute ago
+compare
+pull request 
+merge 
+NOW MAIN HAS THE PROJECT 
+
+
+
+git stash    # conceals changes in the project
+
+git pull origin main
+ALL CHANGES DONE BY ANOTHER USERINCLUDED IN THE PROJECT
+
+git stash apply
+MIGHT HAPPEN CONFLICT (if working on the same file)
+
+Enter the file - tap - shows the conlflict
+
+PyCharm -> Git -> Resolve conflicts -> all files with conflicts + three choices, but better resolve it yourself
+
+git add . 
+git commit -m 'Add final project'
+git push origin user_1
+
+if no pull requests -> pull requests -> choose user_1 -> Create pull request - Merge pull request
+
+
+
+
+github$SJamal5

@@ -1,0 +1,478 @@
+postgres=# CREATE DATABASE customers;
+CREATE DATABASE
+postgres=# \c customers
+You are now connected to database "customers" as user "postgres".
+customers=# CREATE TABLE customers (
+customers(# id SERIAL,
+customers(# name VARCHAR(50),
+customers(# address VARCHAR(150),
+customers(# age INT NOT NULL);
+CREATE TABLE
+
+SERIAL - автоматически заполняет поле id, под капотом имеет автоинкремент (+=1)
+Для изменения данных нужно обращаться к чему-то уникальному, в данном случае id
+
+добавление столбца
+customers=# ALTER TABLE customers ADD hobby VARCHAR(50) NOT NULL DEFAULT 'Unknown';
+ALTER TABLE
+customers=# \d customers
+
+удаление столбца
+customers=# ALTER TABLE customers DROP COLUMN hobby;
+ALTER TABLE
+customers=# \d customers
+
+установление ограничения 
+customers=# ALTER TABLE customers ADD CHECK (age > 0);
+ALTER TABLE
+
+удаление ограничения с определенным названием
+customers=# ALTER TABLE customers DROP CONSTRAINT customers_age_check;
+ALTER TABLE
+
+
+primary key - внутренний уникальный ключ, под капотом у которого unic True 
+foreign key - внешний ключ
+поле с primary key обязательно индексируется!
+
+
+customers=# INSERT INTO customers (name, address, age) VALUES ('Helen', 'Britain', 35);
+INSERT 0 1
+customers=# \d customers
+                                    Table "public.customers"
+ Column  |          Type          | Collation | Nullable |                Default                
+---------+------------------------+-----------+----------+---------------------------------------
+ id      | integer                |           | not null | nextval('customers_id_seq'::regclass)
+ name    | character varying(50)  |           |          | 
+ address | character varying(150) |           |          | 
+ age     | integer                |           | not null | 
+
+customers=# SELECT * FROM customers;
+ id | name  | address | age 
+----+-------+---------+-----
+  1 | Tom   | USA     |  30
+  2 | Helen | Britain |  35
+(2 rows)
+
+customers=# ALTER TABLE customers ADD PRIMARY KEY (id);
+ALTER TABLE
+customers=# SELECT * FROM customers;
+ id | name  | address | age 
+----+-------+---------+-----
+  1 | Tom   | USA     |  30
+  2 | Helen | Britain |  35
+(2 rows)
+
+customers=# \d customers
+                                    Table "public.customers"
+ Column  |          Type          | Collation | Nullable |                Default                
+---------+------------------------+-----------+----------+---------------------------------------
+ id      | integer                |           | not null | nextval('customers_id_seq'::regclass)
+ name    | character varying(50)  |           |          | 
+ address | character varying(150) |           |          | 
+ age     | integer                |           | not null | 
+Indexes:
+    "customers_pkey" PRIMARY KEY, btree (id)
+
+
+добавление колонки с непустыми данными и по дефолту - почта
+ALTER TABLE customers ADD email VARCHAR (50) NOT NULL DEFAULT 'example@gmail.com';
+customers=# SELECT * FROM customers;
+ id | name  | address | age |       email       
+----+-------+---------+-----+-------------------
+  1 | Tom   | USA     |  30 | example@gmail.com
+  2 | Helen | Britain |  35 | example@gmail.com
+(2 rows)
+
+
+обновление данных
+UPDATE customers SET email = 'tom@mail.com' WHERE id = 1;
+customers=# SELECT * FROM customers;
+ id | name  | address | age |       email       
+----+-------+---------+-----+-------------------
+  2 | Helen | Britain |  35 | example@gmail.com
+  1 | Tom   | USA     |  30 | tom@mail.com
+(2 rows)
+
+
+
+добавление уникальности полю email
+ALTER TABLE customers ADD UNIQUE (email);
+
+
+
+добавление ограничения с определенным названием
+customers=# ALTER TABLE customers ADD CONSTRAINT email_unique UNIQUE (email);
+
+                                     Table "public.customers"
+ Column  |          Type          | Collation | Nullable |                Default                 
+---------+------------------------+-----------+----------+----------------------------------------
+ id      | integer                |           | not null | nextval('customers_id_seq'::regclass)
+ name    | character varying(50)  |           |          | 
+ address | character varying(150) |           |          | 
+ age     | integer                |           | not null | 
+ email   | character varying(50)  |           | not null | 'example@gmail.com'::character varying
+Indexes:
+    "customers_pkey" PRIMARY KEY, btree (id)
+    "email_unique" UNIQUE CONSTRAINT, btree (email)
+
+
+переименование столбца в таблице
+ALTER TABLE customers RENAME COLUMN address TO city;
+
+ id | name  |  city   | age |       email       
+----+-------+---------+-----+-------------------
+  2 | Helen | Britain |  35 | example@gmail.com
+  1 | Tom   | USA     |  30 | tom@mail.com
+(2 rows)
+
+
+переименование таблицы
+ALTER TABLE customers RENAME TO users;
+customers=# SELECT * FROM users;
+ id | name  |  city   | age |       email       
+----+-------+---------+-----+-------------------
+  2 | Helen | Britain |  35 | example@gmail.com
+  1 | Tom   | USA     |  30 | tom@mail.com
+(2 rows)
+
+
+DELETE FROM users WHERE city = 'Britain';
+DELETE FROM users;
+
+
+fast_food=# SELECT name, price FROM products;
+     name     | price 
+--------------+-------
+ Burger       |   360
+ Cheeseburger |   250
+ Hot Dog      |   320
+ Doner        |   560
+ Sandwich     |   280
+ Panini       |   299
+(6 rows)
+
+fast_food=# SELECT name, price * quantity FROM products;
+     name     | ?column? 
+--------------+----------
+ Burger       |     1080
+ Cheeseburger |      500
+ Hot Dog      |      640
+ Doner        |      560
+ Sandwich     |     1400
+ Panini       |      897
+(6 rows)
+
+fast_food=# SELECT name, price * quantity AS total_cost FROM products;
+     name     | total_cost 
+--------------+------------
+ Burger       |       1080
+ Cheeseburger |        500
+ Hot Dog      |        640
+ Doner        |        560
+ Sandwich     |       1400
+ Panini       |        897
+(6 rows)
+
+fast_food=# SELECT * FROM products WHERE price > 300;
+ id |  name   |  meat   | quantity | price 
+----+---------+---------+----------+-------
+  1 | Burger  | Chicken |        3 |   360
+  3 | Hot Dog | Sausage |        2 |   320
+  4 | Doner   | Beef    |        1 |   560
+(3 rows)
+
+
+fast_food=# SELECT * FROM products WHERE meat = 'Beef';
+ id | name  | meat | quantity | price 
+----+-------+------+----------+-------
+  4 | Doner | Beef |        1 |   560
+(1 row)
+
+fast_food=# SELECT name FROM products WHERE price * quantity > 1000;
+   name   
+----------
+ Burger
+ Sandwich
+(2 rows)
+
+
+fast_food=# SELECT * FROM products WHERE meat = 'Beef' AND price * quantity > 500;
+ id | name  | meat | quantity | price 
+----+-------+------+----------+-------
+  4 | Doner | Beef |        1 |   560
+(1 row)
+
+
+fast_food=# SELECT * FROM products WHERE meat = 'Beef' OR price * quantity > 500;
+ id |   name   |  meat   | quantity | price 
+----+----------+---------+----------+-------
+  1 | Burger   | Chicken |        3 |   360
+  3 | Hot Dog  | Sausage |        2 |   320
+  4 | Doner    | Beef    |        1 |   560
+  5 | Sandwich | Bacon   |        5 |   280
+  6 | Panini   | Fish    |        3 |   299
+(5 rows)
+
+
+
+fast_food=# SELECT * FROM products WHERE NOT meat = 'Beef';
+fast_food=# SELECT * FROM products WHERE meat <> 'Beef';
+fast_food=# SELECT * FROM products WHERE meat != 'Beef';
+ id |     name     |  meat   | quantity | price 
+----+--------------+---------+----------+-------
+  1 | Burger       | Chicken |        3 |   360
+  2 | Cheeseburger | Cheese  |        2 |   250
+  3 | Hot Dog      | Sausage |        2 |   320
+  5 | Sandwich     | Bacon   |        5 |   280
+  6 | Panini       | Fish    |        3 |   299
+(5 rows)
+
+
+fast_food=# SELECT * FROM products WHERE meat = 'Beef' OR price > 1500 AND quantity = 2;
+ id | name  | meat | quantity | price 
+----+-------+------+----------+-------
+  4 | Doner | Beef |        1 |   560
+(1 row)
+
+fast_food=# SELECT * FROM products WHERE (meat = 'Beef' OR price > 1500) AND quantity = 2;
+ id | name | meat | quantity | price 
+----+------+------+----------+-------
+(0 rows)
+
+
+
+fast_food=# fast_food=# INSERT INTO products (name, meat, quantity, price) VALUES ('Burger', 'Chicken', 3, 350);
+ERROR:  syntax error at or near "fast_food"
+LINE 1: fast_food=# INSERT INTO products (name, meat, quantity, pric...
+        ^
+fast_food=# INSERT 0 1
+fast_food-# fast_food=# SELECT * FROM products;
+ERROR:  syntax error at or near "0"
+LINE 1: INSERT 0 1
+               ^
+fast_food=#  id |     name     |  meat   | quantity | price 
+fast_food-# ----+--------------+---------+----------+-------
+fast_food-#   1 | Burger       | Chicken |        3 |   360
+fast_food-#   2 | Cheeseburger | Cheese  |        2 |   250
+fast_food-#   3 | Hot Dog      | Sausage |        2 |   320
+fast_food-#   4 | Doner        | Beef    |        1 |   560
+fast_food-#   5 | Sandwich     | Bacon   |        5 |   280
+fast_food-#   6 | Panini       | Fish    |        3 |   299
+fast_food-#   7 | Burger       | Chicken |        3 |   350
+fast_food-# (7 rows)
+fast_food-# 
+fast_food-# fast_food=# SELECT DISTINCT name FROM products;
+ERROR:  syntax error at or near "id"
+LINE 1: id |     name     |  meat   | quantity | price 
+        ^
+fast_food=#      name     
+fast_food-# --------------
+fast_food-#  Doner
+fast_food-#  Burger
+fast_food-#  Cheeseburger
+fast_food-#  Hot Dog
+fast_food-#  Panini
+fast_food-#  Sandwich
+fast_food-# (6 rows)
+fast_food-#  id |     name     |  meat   | quantity | price 
+----+--------------+---------+----------+-------
+  1 | Burger       | Chicken |        3 |   360
+  2 | Cheeseburger | Cheese  |        2 |   250
+  3 | Hot Dog      | Sausage |        2 |   320
+  4 | Doner        | Beef    |        1 |   560
+  5 | Sandwich     | Bacon   |        5 |   280
+  6 | Panini       | Fish    |        3 |   299
+  7 | Burger       | Chicken |        3 |   350
+(7 rows)
+fast_food=# SELECT DISTINCT name FROM products;
+ERROR:  syntax error at or near "name"
+LINE 1: name     
+        ^
+fast_food=#      name     
+--------------
+ Doner
+ Burger
+ Cheeseburger
+ Hot Dog
+ Panini
+ Sandwich
+(6 rows)
+ id |     name     |  meat   | quantity | price 
+----+--------------+---------+----------+-------
+  1 | Burger       | Chicken |        3 |   360
+  2 | Cheeseburger | Cheese  |        2 |   250
+  3 | Hot Dog      | Sausage |        2 |   320
+  4 | Doner        | Beef    |        1 |   560
+  5 | Sandwich     | Bacon   |        5 |   280
+  6 | Panini       | Fish    |        3 |   299
+  7 | Burger       | Chicken |        3 |   350
+(7 rows)
+fast_food=# SELECT DISTINCT name FROM products;
+ERROR:  syntax error at or near "name"
+LINE 1: name     
+        ^
+fast_food=# SELECT * FROM products ORDER BY price;
+ id |     name     |  meat   | quantity | price 
+----+--------------+---------+----------+-------
+  2 | Cheeseburger | Cheese  |        2 |   250
+  5 | Sandwich     | Bacon   |        5 |   280
+  6 | Panini       | Fish    |        3 |   299
+  3 | Hot Dog      | Sausage |        2 |   320
+  7 | Burger       | Chicken |        3 |   350
+  1 | Burger       | Chicken |        3 |   360
+  4 | Doner        | Beef    |        1 |   560
+(7 rows)
+
+fast_food=# SELECT * FROM products ORDER BY quantity;
+ id |     name     |  meat   | quantity | price 
+----+--------------+---------+----------+-------
+  4 | Doner        | Beef    |        1 |   560
+  2 | Cheeseburger | Cheese  |        2 |   250
+  3 | Hot Dog      | Sausage |        2 |   320
+  1 | Burger       | Chicken |        3 |   360
+  6 | Panini       | Fish    |        3 |   299
+  7 | Burger       | Chicken |        3 |   350
+  5 | Sandwich     | Bacon   |        5 |   280
+(7 rows)
+
+fast_food=#      name     
+--------------
+ Doner
+ Burger
+ Cheeseburger
+ Hot Dog
+ Panini
+ Sandwich
+(6 rows)
+ id |     name     |  meat   | quantity | price 
+----+--------------+---------+----------+-------
+  1 | Burger       | Chicken |        3 |   360
+  2 | Cheeseburger | Cheese  |        2 |   250
+  3 | Hot Dog      | Sausage |        2 |   320
+  4 | Doner        | Beef    |        1 |   560
+  5 | Sandwich     | Bacon   |        5 |   280
+  6 | Panini       | Fish    |        3 |   299
+  7 | Burger       | Chicken |        3 |   350
+(7 rows)
+fast_food=# SELECT DISTINCT name FROM products;
+ERROR:  syntax error at or near "name"
+LINE 1: name     
+        ^
+fast_food=# 
+
+fast_food=# SELECT name, price AS total_sum FROM products ORDER BY total_sum;
+     name     | total_sum 
+--------------+-----------
+ Cheeseburger |       250
+ Sandwich     |       280
+ Panini       |       299
+ Hot Dog      |       320
+ Burger       |       350
+ Burger       |       360
+ Doner        |       560
+(7 rows)
+
+fast_food=# SELECT name FROM products ORDER BY price * quantity;
+     name     
+--------------
+ Cheeseburger
+ Doner
+ Hot Dog
+ Panini
+ Burger
+ Burger
+ Sandwich
+(7 rows)
+
+
+сортировка по убыванию
+fast_food=# SELECT * FROM products ORDER BY name DESC;
+ id |     name     |  meat   | quantity | price 
+----+--------------+---------+----------+-------
+  5 | Sandwich     | Bacon   |        5 |   280
+  6 | Panini       | Fish    |        3 |   299
+  3 | Hot Dog      | Sausage |        2 |   320
+  4 | Doner        | Beef    |        1 |   560
+  2 | Cheeseburger | Cheese  |        2 |   250
+  1 | Burger       | Chicken |        3 |   360
+  7 | Burger       | Chicken |        3 |   350
+(7 rows)
+
+
+fast_food=# SELECT name, price FROM products ORDER BY meat ASC, price DESC;
+     name     | price 
+--------------+-------
+ Sandwich     |   280
+ Doner        |   560
+ Cheeseburger |   250
+ Burger       |   360
+ Burger       |   350
+ Panini       |   299
+ Hot Dog      |   320
+(7 rows)
+
+
+fast_food=# SELECT * FROM products ORDER BY name LIMIT 2;
+ id |  name  |  meat   | quantity | price 
+----+--------+---------+----------+-------
+  1 | Burger | Chicken |        3 |   360
+  7 | Burger | Chicken |        3 |   350
+(2 rows)
+
+fast_food=# SELECT * FROM products ORDER BY name LIMIT 3;
+ id |     name     |  meat   | quantity | price 
+----+--------------+---------+----------+-------
+  1 | Burger       | Chicken |        3 |   360
+  7 | Burger       | Chicken |        3 |   350
+  2 | Cheeseburger | Cheese  |        2 |   250
+(3 rows)
+
+
+fast_food=# SELECT * FROM products WHERE meat IN ('Beef', 'Cheese', 'Apple');
+ id |     name     |  meat  | quantity | price 
+----+--------------+--------+----------+-------
+  2 | Cheeseburger | Cheese |        2 |   250
+  4 | Doner        | Beef   |        1 |   560
+(2 rows)
+
+fast_food=# SELECT * FROM products WHERE quantity BETWEEN 1 AND 3;
+ id |     name     |  meat   | quantity | price 
+----+--------------+---------+----------+-------
+  1 | Burger       | Chicken |        3 |   360
+  2 | Cheeseburger | Cheese  |        2 |   250
+  3 | Hot Dog      | Sausage |        2 |   320
+  4 | Doner        | Beef    |        1 |   560
+  6 | Panini       | Fish    |        3 |   299
+  7 | Burger       | Chicken |        3 |   350
+(6 rows)
+
+
+fast_food=# SELECT * FROM products WHERE quantity NOT BETWEEN 1 AND 3;
+ id |   name   | meat  | quantity | price 
+----+----------+-------+----------+-------
+  5 | Sandwich | Bacon |        5 |   280
+(1 row)
+
+
+fast_food=# SELECT * FROM products WHERE name LIKE 'Burger';
+ id |  name  |  meat   | quantity | price 
+----+--------+---------+----------+-------
+  1 | Burger | Chicken |        3 |   360
+  7 | Burger | Chicken |        3 |   350
+(2 rows)
+
+fast_food=# SELECT * FROM products WHERE name LIKE 'Bur%';
+ id |  name  |  meat   | quantity | price 
+----+--------+---------+----------+-------
+  1 | Burger | Chicken |        3 |   360
+  7 | Burger | Chicken |        3 |   350
+(2 rows)
+
+fast_food=# SELECT * FROM products WHERE name LIKE '%ur%';
+ id |     name     |  meat   | quantity | price 
+----+--------------+---------+----------+-------
+  1 | Burger       | Chicken |        3 |   360
+  2 | Cheeseburger | Cheese  |        2 |   250
+  7 | Burger       | Chicken |        3 |   350
+(3 rows)

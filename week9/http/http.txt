@@ -1,0 +1,66 @@
+>>> response = requests.get('https://github.com')
+>>> response
+<Response [200]>
+>>> response.status_code
+200
+>>> response.headers
+{'Server': 'GitHub.com', 'Date': 'Wed, 16 Feb 2022 12:40:41 GMT', 'Content-Type': 'text/html; charset=utf-8', 'Vary': 'X-PJAX, X-PJAX-Container, Accept-Language, Accept-Encoding, Accept, X-Requested-With', 'permissions-policy': 'interest-cohort=()', 'content-language': 'en-US', 'ETag': 'W/"49c92ff8568023d76c91e492101cc4a4"', 'Cache-Control': 'max-age=0, private, must-revalidate', 'Strict-Transport-Security': 'max-age=31536000; includeSubdomains; preload', 'X-Frame-Options': 'deny', 'X-Content-Type-Options': 'nosniff', 'X-XSS-Protection': '0', 'Referrer-Policy': 'origin-when-cross-origin, strict-origin-when-cross-origin', 'Expect-CT': 'max-age=2592000, report-uri="https://api.github.com/_private/browser/errors"', 'Content-Security-Policy': "default-src 'none'; base-uri 'self'; block-all-mixed-content; child-src github.com/assets-cdn/worker/ gist.github.com/assets-cdn/worker/; connect-src 'self' uploads.github.com objects-origin.githubusercontent.com www.githubstatus.com collector.githubapp.com collector.github.com api.github.com github-cloud.s3.amazonaws.com github-production-repository-file-5c1aeb.s3.amazonaws.com github-production-upload-manifest-file-7fdce7.s3.amazonaws.com github-production-user-asset-6210df.s3.amazonaws.com cdn.optimizely.com logx.optimizely.com/v1/events translator.github.com wss://alive.github.com github.githubassets.com; font-src github.githubassets.com; form-action 'self' github.com gist.github.com objects-origin.githubusercontent.com; frame-ancestors 'none'; frame-src render.githubusercontent.com viewscreen.githubusercontent.com notebooks.githubusercontent.com; img-src 'self' data: github.githubassets.com identicons.github.com collector.githubapp.com collector.github.com github-cloud.s3.amazonaws.com secured-user-images.githubusercontent.com/ *.githubusercontent.com customer-stories-feed.github.com spotlights-feed.github.com; manifest-src 'self'; media-src github.com user-images.githubusercontent.com/ github.githubassets.com; script-src github.githubassets.com; style-src 'unsafe-inline' github.githubassets.com; worker-src github.com/assets-cdn/worker/ gist.github.com/assets-cdn/worker/", 'Content-Encoding': 'gzip', 'Set-Cookie': '_gh_sess=pIckXlyf5overRqcEZzjOHvJ2dAjh2JbJHtyTXXs0P3yGe22qfSqblz3NoJeNaEm%2Bc2hwXsy4rdcTyDCpVNYZhq5ii5gCtpmK1PR8KsQiX2CZg6Vtpij4Rk4bi3aFEZjk2qhfa%2B0TyAitJQ%2BOksIGgKeD7Ip5Y8KEBdQ6iasljpBKATMVc%2B3QFe6jOyQIY2o0uVqEDbfMJKcM9fBRYkJl8L3zeJnHA2VOmXT%2BeXfg9BNvCBuPqna4y5Uhx1K4okjeJ69M5kxjeEHHFKuO0RDrA%3D%3D--XVFVfqpXAiusbZb0--0nq7OkdeAobmcoM%2F0rXDvA%3D%3D; Path=/; HttpOnly; Secure; SameSite=Lax, _octo=GH1.1.621987205.1645015242; Path=/; Domain=github.com; Expires=Thu, 16 Feb 2023 12:40:42 GMT; Secure; SameSite=Lax, logged_in=no; Path=/; Domain=github.com; Expires=Thu, 16 Feb 2023 12:40:42 GMT; HttpOnly; Secure; SameSite=Lax', 'Accept-Ranges': 'bytes', 'Transfer-Encoding': 'chunked', 'X-GitHub-Request-Id': '98FC:33A6:5F5828:63AA11:620CF0CA'}
+>>> response.ok
+True
+>>> response.request
+<PreparedRequest [GET]>
+>>> response.url
+'https://github.com/'
+response.text ~ response.content (для картинок, медиа и видео)
+
+
+1. Метод OPTIONS 
+сервер запрос
+>>> response = requests.options('https://httpbin.org/')
+>>> response
+<Response [200]>
+>>> response.headers['Access-Control-Allow-Methods']
+'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+>>> get_params = {'page': 11, 'product': 'car'}
+>>> response = requests.get('https://httpbin.org/', params=get_params)
+>>> response.url
+'https://httpbin.org/?page=11&product=car'
+
+2. Метод запроса GET 
+site.com/?category=phones&page=2
+
+3. Метод POST - 
+>>> post_params = {'user': 'admin', 'password': 'admin_password'}
+>>> response = requests.post('https://httpbin.org/post', data=post_params)
+>>> response.json()['form']
+{'password': 'admin_password', 'user': 'admin'}
+
+4. Метод HEAD вытаскивает только определенную информацию
+response = requests.head('https://httpbin.org/)
+>>> response.headers
+{'Date': 'Wed, 16 Feb 2022 13:25:25 GMT', 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': '9593', 'Connection': 'keep-alive', 'Server': 'gunicorn/19.9.0', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'true'}
+
+5. Метод PUT
+>>> put_params = {'user': 'admin', 'password': 'admin_pass1'}
+>>> response = requests.put('https://httpbin.org/put', data=put_params)
+>>> response.status_code
+200
+>>> response = requests.put('https://httpbin.org/', data=put_params)
+>>> response.status_code
+405
+
+
+6. Метод PATCH
+>>> patch_params = {'user': 'new_user', 'password': 'new_password'}
+>>> response = requests.patch ('https://httpbin.org/patch', data=patch_params)
+>>> response.status_code
+200
+
+7. Метод DELETE
+>>> del_params = {'id': 'phone123', 'name': 'iPhone'}
+>>> response = requests.delete('https://httpbin.org/delete', data=del_params)
+>>> response.json()['form']
+{'id': 'phone123', 'name': 'iPhone'}
+>>> response.status_code
+200
+

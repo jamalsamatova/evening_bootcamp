@@ -1,0 +1,358 @@
+postgres=# \c fast_food
+You are now connected to database "fast_food" as user "postgres".
+fast_food=# SELECT * FROM products;
+ id |     name     |  meat   | quantity | price 
+----+--------------+---------+----------+-------
+  1 | Burger       | Chicken |        3 |   360
+  2 | Cheeseburger | Cheese  |        2 |   250
+  3 | Hot Dog      | Sausage |        2 |   320
+  4 | Doner        | Beef    |        1 |   560
+  5 | Sandwich     | Bacon   |        5 |   280
+  6 | Panini       | Fish    |        3 |   299
+  7 | Burger       | Chicken |        3 |   350
+(7 rows)
+
+
+fast_food=# SELECT AVG(price) AS average_price FROM products;
+    average_price     
+----------------------
+ 345.5714285714285714
+(1 row)
+
+
+fast_food=# SELECT COUNT(*) FROM products;
+ count 
+-------
+     7
+(1 row)
+
+
+fast_food=# SELECT COUNT(DISTINCT name) FROM products;
+ count 
+-------
+     6
+(1 row)
+
+
+fast_food=# SELECT MIN(price) FROM products;
+ min 
+-----
+ 250
+(1 row)
+
+
+fast_food=# SELECT MAX(price) FROM products;
+ max 
+-----
+ 560
+(1 row)
+
+
+fast_food=# SELECT SUM(price) FROM products;
+ sum  
+------
+ 2419
+(1 row)
+
+
+fast_food=# SELECT meat, COUNT(*) AS food_count FROM products GROUP BY meat;
+  meat   | food_count 
+---------+------------
+ Sausage |          1
+ Chicken |          2
+ Bacon   |          1
+ Beef    |          1
+ Fish    |          1
+ Cheese  |          1
+(6 rows)
+
+
+fast_food=# SELECT meat, name, COUNT(*) AS food_count FROM products GROUP BY meat, name;
+  meat   |     name     | food_count 
+---------+--------------+------------
+ Cheese  | Cheeseburger |          1
+ Fish    | Panini       |          1
+ Beef    | Doner        |          1
+ Sausage | Hot Dog      |          1
+ Bacon   | Sandwich     |          1
+ Chicken | Burger       |          2
+(6 rows)
+
+
+fast_food=# SELECT meat, COUNT(*) AS food_count FROM products GROUP BY meat HAVING COUNT(*) > 1;
+  meat   | food_count 
+---------+------------
+ Chicken |          2
+(1 row)
+
+
+
+fast_food=# CREATE DATABASE orders;
+CREATE DATABASE
+fast_food=# \c orders
+You are now connected to database "orders" as user "postgres".
+orders=# \d
+Did not find any relations.
+orders=# CREATE TABLE products (
+orders(# id SERIAL PRIMARY KEY,
+orders(# name VARCHAR(30) NOT NULL,
+orders(# meat VARCHAR(20) NOT NULL,
+orders(# quantity INT DEFAULT 0,
+orders(# price INT NOT NULL);
+CREATE TABLE
+orders=# INSERT INTO products (name, meat, quantity, price) VALUES
+orders-# ('Burger', 'Chicken', 3, 360), ('Cheese Burger', 'Cheese', 2, 250), ('Hot Dog', 'Sausage', 2, 320), ('Doner', 'Beef', 5, 450),
+orders-# ('Sandwich', 'Bacon', 4, 150), ('Rolls', 'Fish', 6, 170);
+INSERT 0 6
+orders=# \d products
+                                    Table "public.products"
+  Column  |         Type          | Collation | Nullable |               Default                
+----------+-----------------------+-----------+----------+--------------------------------------
+ id       | integer               |           | not null | nextval('products_id_seq'::regclass)
+ name     | character varying(30) |           | not null | 
+ meat     | character varying(20) |           | not null | 
+ quantity | integer               |           |          | 0
+ price    | integer               |           | not null | 
+Indexes:
+    "products_pkey" PRIMARY KEY, btree (id)
+
+orders=# SELECT * FROM products;
+ id |     name      |  meat   | quantity | price 
+----+---------------+---------+----------+-------
+  1 | Burger        | Chicken |        3 |   360
+  2 | Cheese Burger | Cheese  |        2 |   250
+  3 | Hot Dog       | Sausage |        2 |   320
+  4 | Doner         | Beef    |        5 |   450
+  5 | Sandwich      | Bacon   |        4 |   150
+  6 | Rolls         | Fish    |        6 |   170
+(6 rows)
+
+orders=# CREATE TYPE mood AS ENUM ('sad', 'ok', 'happy');
+CREATE TYPE
+orders=# CREATE TABLE customers (
+orders(# id SERIAL PRIMARY KEY,
+orders(# current_mood mood,
+orders(# first_name VARCHAR(50) NOT NULL);
+CREATE TABLE
+orders=# \d customers
+                                      Table "public.customers"
+    Column    |         Type          | Collation | Nullable |                Default                
+--------------+-----------------------+-----------+----------+---------------------------------------
+ id           | integer               |           | not null | nextval('customers_id_seq'::regclass)
+ current_mood | mood                  |           |          | 
+ first_name   | character varying(50) |           | not null | 
+Indexes:
+    "customers_pkey" PRIMARY KEY, btree (id)
+
+
+
+orders=# \d
+                List of relations
+ Schema |       Name       |   Type   |  Owner   
+--------+------------------+----------+----------
+ public | customers        | table    | postgres
+ public | customers_id_seq | sequence | postgres
+ public | products         | table    | postgres
+ public | products_id_seq  | sequence | postgres
+(4 rows)
+
+orders=# CREATE TABLE orders (
+orders(# id SERIAL PRIMARY KEY,
+orders(# product_id INT NOT NULL REFERENCES products (id) ON DELETE CASCADE, 
+orders(# customer_id INT NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+orders(# count INT DEFAULT 1);
+CREATE TABLE
+
+
+orders=# \d orders
+                               Table "public.orders"
+   Column    |  Type   | Collation | Nullable |              Default               
+-------------+---------+-----------+----------+------------------------------------
+ id          | integer |           | not null | nextval('orders_id_seq'::regclass)
+ product_id  | integer |           | not null | 
+ customer_id | integer |           | not null | 
+ count       | integer |           |          | 1
+Indexes:
+    "orders_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "orders_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+    "orders_product_id_fkey" FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+
+
+orders=# INSERT INTO customers (current_mood, first_name) VALUES ('ok', 'Tom'), ('happy', 'Jessica'), ('sad', 'Bob');
+INSERT 0 3
+
+
+orders=# SELECT first_name, id FROM customers;
+ first_name | id 
+------------+----
+ Tom        |  1
+ Jessica    |  2
+ Bob        |  3
+(3 rows)
+
+orders=# SELECT name, meat, id FROM products;
+     name      |  meat   | id 
+---------------+---------+----
+ Burger        | Chicken |  1
+ Cheese Burger | Cheese  |  2
+ Hot Dog       | Sausage |  3
+ Doner         | Beef    |  4
+ Sandwich      | Bacon   |  5
+ Rolls         | Fish    |  6
+(6 rows)
+
+orders=# INSERT INTO orders (product_id, customer_id, count) VALUES (1,2,3), (4,2,5), (3,1,3), (5,3,1);
+INSERT 0 4
+
+orders=# SELECT * FROM orders;
+ id | product_id | customer_id | count 
+----+------------+-------------+-------
+  1 |          1 |           2 |     3
+  2 |          4 |           2 |     5
+  3 |          3 |           1 |     3
+  4 |          5 |           3 |     1
+(4 rows)
+
+orders=# SELECT products.name, orders.count FROM orders JOIN products ON products.id = orders.product_id;
+   name   | count 
+----------+-------
+ Burger   |     3
+ Doner    |     5
+ Hot Dog  |     3
+ Sandwich |     1
+(4 rows)
+
+
+ПСЕВДОНИМЫ - сокращение названий
+orders=# SELECT p.name, p.meat, o.count FROM orders AS o JOIN products AS p ON p.id = o.product_id;
+   name   |  meat   | count 
+----------+---------+-------
+ Burger   | Chicken |     3
+ Doner    | Beef    |     5
+ Hot Dog  | Sausage |     3
+ Sandwich | Bacon   |     1
+(4 rows)
+
+
+orders=# SELECT customers.first_name, products.name, orders.count FROM orders JOIN customers ON customers.id = orders.customer_id JOIN products ON products.id = orders.product_id;
+ first_name |   name   | count 
+------------+----------+-------
+ Jessica    | Burger   |     3
+ Jessica    | Doner    |     5
+ Tom        | Hot Dog  |     3
+ Bob        | Sandwich |     1
+(4 rows)
+
+
+orders=# SELECT customers.first_name, products.name, orders.count FROM orders JOIN customers ON customers.id = orders.customer_id JOIN products ON products.id = orders.product_id WHERE products.price > 150 ORDER BY customers.first_name;
+ first_name |  name   | count 
+------------+---------+-------
+ Jessica    | Burger  |     3
+ Jessica    | Doner   |     5
+ Tom        | Hot Dog |     3
+(3 rows)
+
+
+orders=# \q
+postgres@jamal-Inspiron-11-3147:~$ exit
+logout
+jamal@jamal-Inspiron-11-3147:~$ ls
+Desktop    Downloads         folder                                  Music     psql_commands.txt.save  snap       test_dir
+Documents  evening_bootcamp  google-chrome-stable_current_amd64.deb  Pictures  Public                  Templates  Videos
+jamal@jamal-Inspiron-11-3147:~$ ls
+Desktop    Downloads         folder                                  Music     psql_commands.txt.save  shakespeare.sql  Templates  Videos
+Documents  evening_bootcamp  google-chrome-stable_current_amd64.deb  Pictures  Public                  snap             test_dir
+jamal@jamal-Inspiron-11-3147:~$ sudo -i -u postgres
+[sudo] password for jamal: 
+postgres@jamal-Inspiron-11-3147:~$ psql
+psql (12.9 (Ubuntu 12.9-0ubuntu0.20.04.1))
+Type "help" for help.
+
+
+# УСТАНОВКА ШЕКСПИРА ДЛЯ ТАСКА
+postgres=# CREATE DATABASE shakespeare;
+CREATE DATABASE
+postgres=# \q
+postgres@jamal-Inspiron-11-3147:~$ exit
+logout
+jamal@jamal-Inspiron-11-3147:~$ ls
+Desktop    Downloads         folder                                  Music     psql_commands.txt.save  shakespeare.sql  Templates  Videos
+Documents  evening_bootcamp  google-chrome-stable_current_amd64.deb  Pictures  Public                  snap             test_dir
+jamal@jamal-Inspiron-11-3147:~$ psql -h 127.0.0.1 -d shakespeare -U postgres -f shakespeare.sql
+Password for user postgres: 
+psql: error: FATAL:  password authentication failed for user "postgres"
+FATAL:  password authentication failed for user "postgres"
+jamal@jamal-Inspiron-11-3147:~$ sudo -i -u postgres
+postgres@jamal-Inspiron-11-3147:~$ psql
+psql (12.9 (Ubuntu 12.9-0ubuntu0.20.04.1))
+Type "help" for help.
+
+postgres=# ALTER ROLE postgres WITH PASSWORD '1';
+ALTER ROLE
+postgres=# \q
+postgres@jamal-Inspiron-11-3147:~$ exit
+logout
+jamal@jamal-Inspiron-11-3147:~$ psql -h 127.0.0.1 -d shakespeare -U postgres -f shakespeare.sql
+Password for user postgres: 
+SET
+SET
+SET
+SET
+SET
+SET
+CREATE EXTENSION
+COMMENT
+SET
+SET
+SET
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+COPY 945
+COPY 1266
+COPY 1346
+COPY 35465
+COPY 28830
+COPY 43
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+REVOKE
+REVOKE
+GRANT
+GRANT
+
+
+jamal@jamal-Inspiron-11-3147:~$ sudo -i -u postgres
+postgres@jamal-Inspiron-11-3147:~$ psql
+psql (12.9 (Ubuntu 12.9-0ubuntu0.20.04.1))
+Type "help" for help.
+
+postgres=# \c shakespeare 
+You are now connected to database "shakespeare" as user "postgres".
+shakespeare=# \d
+             List of relations
+ Schema |      Name      | Type  |  Owner   
+--------+----------------+-------+----------
+ public | chapter        | table | postgres
+ public | character      | table | postgres
+ public | character_work | table | postgres
+ public | paragraph      | table | postgres
+ public | wordform       | table | postgres
+ public | work           | table | postgres
+(6 rows)
+
+shakespeare=# SELECT * FROM work;
+shakespeare=# SELECT * FROM paragraph;

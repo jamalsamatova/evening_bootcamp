@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "name": "Jamal",
+      "age": "16",
+      "password": "harry",
+      "id": 1
+    },
+    {
+      "name": "Samatova",
+      "age": "16",
+      "password": "potter",
+      "id": 2
+    },
+    {
+      "name": "alala",
+      "age": "50",
+      "password": "ghj",
+      "id": 3
+    }
+  ]
+}

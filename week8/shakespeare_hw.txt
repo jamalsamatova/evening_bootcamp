@@ -1,0 +1,167 @@
+jamal@jamal-Inspiron-11-3147:~$ sudo -i -u postgres 
+[sudo] password for jamal: 
+postgres@jamal-Inspiron-11-3147:~$ psql
+psql (12.9 (Ubuntu 12.9-0ubuntu0.20.04.1))
+Type "help" for help.
+
+postgres=# CREATE DATABASE shakespeare;
+ERROR:  database "shakespeare" already exists
+postgres=# \c shakespeare
+
+1.__________________________________________________________________________________________
+
+shakespeare=# SELECT plaintext, occurences FROM wordform ORDER BY occurences DESC LIMIT 10;
+ plaintext | occurences 
+-----------+------------
+ the       |      28932
+ and       |      27296
+ i         |      21120
+ to        |      20136
+ of        |      17169
+ a         |      14943
+ you       |      13989
+ my        |      12950
+ in        |      11512
+ that      |      11487
+(10 rows)
+
+2.__________________________________________________________________________________________
+
+shakespeare=# SELECT plaintext FROM wordform WHERE plaintext ILIKE 'A%';
+
+3.__________________________________________________________________________________________
+
+shakespeare=# SELECT title FROM work WHERE work.genretype = 'p';
+         title          
+------------------------
+ Lover's Complaint
+ Passionate Pilgrim
+ Phoenix and the Turtle
+ Rape of Lucrece
+ Venus and Adonis
+(5 rows)
+
+4.__________________________________________________________________________________________
+
+shakespeare=# SELECT ROUND(AVG(totalparagraphs), 2) AS average FROM work WHERE work.genretype = 't';
+  round  
+---------
+ 1070.82
+(1 row)
+
+5.__________________________________________________________________________________________
+
+shakespeare=# SELECT title FROM work WHERE work.totalwords > (SELECT AVG(totalwords) FROM work);
+           title           
+---------------------------
+ All's Well That Ends Well
+ Antony and Cleopatra
+ As You Like It
+ Coriolanus
+ Cymbeline
+ Hamlet
+ Henry IV, Part I
+ Henry IV, Part II
+ Henry V
+ Henry VI, Part I
+ Henry VI, Part II
+ Henry VI, Part III
+ Henry VIII
+ King John
+ King Lear
+ Love's Labour's Lost
+ Measure for Measure
+ Merchant of Venice
+ Merry Wives of Windsor
+ Much Ado about Nothing
+ Othello
+ Richard II
+ Richard III
+ Romeo and Juliet
+ Taming of the Shrew
+ Titus Andronicus
+ Troilus and Cressida
+ The Winter's Tale
+(28 rows)
+
+6.__________________________________________________________________________________________
+
+shakespeare=# SELECT c.charname, c.speechcount, w.title FROM character AS c JOIN character_work AS cw ON c.charid = cw.charid JOIN work AS w ON w.workid = cw.workid; 
+
+7.__________________________________________________________________________________________
+
+shakespeare=# SELECT ROUND(AVG(speechcount), 2) AS avg FROM character AS c JOIN character_work AS cw ON c.charid = cw.charid JOIN work AS w ON w.workid = cw.workid WHERE w.title = 'Romeo and Juliet';
+  avg  
+-------
+ 25.55
+(1 row)
+
+8.__________________________________________________________________________________________
+
+shakespeare=# SELECT wordcount, paragraphid FROM paragraph;
+
+9.__________________________________________________________________________________________
+
+shakespeare=# SELECT charname FROM character WHERE speechcount > 15 AND speechcount < 30;
+
+10._________________________________________________________________________________________
+
+shakespeare=# SELECT title, year FROM work WHERE year BETWEEN 1600 AND 1701;
+           title           | year 
+---------------------------+------
+ All's Well That Ends Well | 1602
+ Antony and Cleopatra      | 1606
+ Coriolanus                | 1607
+ Cymbeline                 | 1609
+ Hamlet                    | 1600
+ Henry VIII                | 1612
+ King Lear                 | 1605
+ Lover's Complaint         | 1609
+ Macbeth                   | 1605
+ Measure for Measure       | 1604
+ Merry Wives of Windsor    | 1600
+ Othello                   | 1604
+ Pericles                  | 1608
+ Phoenix and the Turtle    | 1601
+ Sonnets                   | 1609
+ Tempest                   | 1611
+ Timon of Athens           | 1607
+ Troilus and Cressida      | 1601
+ The Winter's Tale         | 1610
+(19 rows)
+
+11._________________________________________________________________________________________
+
+shakespeare=# SELECT title FROM work WHERE title ILIKE '%the %';
+         title          
+------------------------
+ Phoenix and the Turtle
+ Taming of the Shrew
+ The Winter's Tale
+(3 rows)
+
+12._________________________________________________________________________________________
+
+shakespeare=# SELECT DISTINCT section FROM paragraph;
+ section 
+---------
+       0
+       1
+       3
+       5
+       4
+       2
+(6 rows)
+
+
+13._________________________________________________________________________________________
+
+shakespeare=# SELECT c.chapterid AS id, c.description, w.title FROM chapter AS c JOIN work AS w ON c.workid = w.workid;
+
+14._________________________________________________________________________________________
+
+shakespeare=# SELECT p.paragraphnum, c.charname, c.speechcount FROM paragraph AS p JOIN character AS c ON p.charid = c.charid;
+
+15._________________________________________________________________________________________
+
+shakespeare=# SELECT p.paragraphnum, w.title, w.year FROM paragraph AS p JOIN work AS w ON p.workid = w.workid;
